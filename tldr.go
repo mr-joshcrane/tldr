@@ -1,10 +1,12 @@
 package tldr
 
 import (
+	"context"
 	"fmt"
+	"html/template"
 	"net/http"
-	"net/http/httputil"
 	"net/url"
+	"os"
 
 	"github.com/cixtor/readability"
 	"github.com/mr-joshcrane/oracle"
@@ -42,6 +44,7 @@ func GetContent(path string) (msg string, err error) {
 type TLDRServer struct {
 	oracle     *oracle.Oracle
 	httpServer *http.Server
+	tmpl       *template.Template
 }
 
 func NewTLDRServer(o *oracle.Oracle, addr string) *TLDRServer {
@@ -50,6 +53,7 @@ func NewTLDRServer(o *oracle.Oracle, addr string) *TLDRServer {
 		httpServer: &http.Server{
 			Addr: addr,
 		},
+		tmpl: template.Must(template.ParseFiles("templates/card.html")),
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/chat/", s.chatHandler)
@@ -60,37 +64,54 @@ func NewTLDRServer(o *oracle.Oracle, addr string) *TLDRServer {
 }
 
 func (s *TLDRServer) indexHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "TLDR")
+	err := template.Must(template.ParseFiles("templates/index.html")).Execute(w, nil)
+	if err != nil {
+		// Log something here?
+		fmt.Fprintln(os.Stderr, err)
+		http.Error(w, "Internal error", http.StatusInternalServerError)
+	}
 }
 
 func (s *TLDRServer) chatHandler(w http.ResponseWriter, r *http.Request) {
-	req, err := httputil.DumpRequest(r, true)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	fmt.Println(string(req))
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 	defer r.Body.Close()
-	err = r.ParseForm()
+	err := r.ParseForm()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 	url := r.FormValue("summaryUrl")
+	err = s.htmlFragment(w, url)
+	if err != nil {
+		// Log something here?
+		fmt.Fprintln(os.Stderr, err)
+		http.Error(w, "Internal error", http.StatusInternalServerError)
+	}
+}
 
-	fmt.Println("url: ", url)
+func (s *TLDRServer) htmlFragment(w http.ResponseWriter, url string) error {
 	summary, err := TLDR(s.oracle, url)
 	if err != nil {
-		fmt.Println(err)
-		http.Error(w, err.Error(), http.StatusBadGateway)
+		// Log something here?
+		return err
 	}
-	htmlFragment := fmt.Sprintf("<div class='results'><h3><a href='%s' target='_blank'>%s</a></h3>%s</div>", url, url, summary)
-
-	fmt.Fprintf(w, "%s", htmlFragment)
-
+	title, err := s.oracle.Ask(fmt.Sprintf("Given the summary, generate a title for this article: %s?", summary))
+	if err != nil {
+		// Log something here?
+		return err
+	}
+	data := struct {
+		URL     string
+		Title   string
+		Summary string
+	}{
+		URL:     url,
+		Title:   title,
+		Summary: summary,
+	}
+	return s.tmpl.Execute(w, data)
 }
 
 func (s *TLDRServer) ListenAndServe() error {
@@ -98,7 +119,5 @@ func (s *TLDRServer) ListenAndServe() error {
 }
 
 func (s *TLDRServer) Shutdown() error {
-	return s.httpServer.Shutdown(nil)
+	return s.httpServer.Shutdown(context.TODO())
 }
-
-// mux := http.NewServeMux()

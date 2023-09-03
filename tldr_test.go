@@ -6,8 +6,7 @@ import (
 	"io"
 	"net"
 	"net/http"
-	"net/http/httputil"
-	"strings"
+	"net/url"
 	"testing"
 
 	"github.com/mr-joshcrane/assistant"
@@ -18,17 +17,10 @@ func TestChatHandlerAcceptsPost(t *testing.T) {
 	t.Parallel()
 	addr := newTestTLDRServer(t)
 	fmt.Println(addr)
-	req, err := http.NewRequest(http.MethodPost, "http://"+addr+"/api/chat", strings.NewReader("hello"))
-	if err != nil {
-		t.Fatalf("Expected no error, got %v", err)
+	v := url.Values{
+		"summaryUrl": []string{"https://example.com"},
 	}
-	dump, err := httputil.DumpRequest(req, true)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	fmt.Println(string(dump))
-	resp, err := http.Post("http://"+addr+"/api/chat/", "text/plain", strings.NewReader("hello"))
+	resp, err := http.PostForm("http://"+addr+"/api/chat/", v)
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}
@@ -40,20 +32,21 @@ func TestChatHandlerAcceptsPost(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}
-	if !bytes.Contains(data, []byte("https://example.com")) {
+	if !bytes.Contains(data, []byte("A summary of the article")) {
 		t.Fatalf("Expected %s to contain %s", data, "https://example.com")
 	}
 }
 
 func newTestTLDRServer(t *testing.T) string {
 	t.Helper()
-	l, err := net.Listen("tcp", ":0")
+	l, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
 		t.Fatalf("Expected no error opening listener, got %v", err)
 	}
+
 	addr := l.Addr().String()
 	l.Close()
-	o := oracle.NewOracle("dummy-key")
+	o := oracle.NewOracle("dummy-key", oracle.WithDummyClient("A summary of the article"))
 	srv := assistant.NewTLDRServer(o, addr)
 	go func() {
 		err := srv.ListenAndServe()
@@ -61,6 +54,6 @@ func newTestTLDRServer(t *testing.T) string {
 			panic(err)
 		}
 	}()
-	t.Cleanup(func() { srv.Shutdown() })
+	t.Cleanup(func() { _ = srv.Shutdown() })
 	return addr
 }
