@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome to CrapGPT!</title>
+    <script src="https://unpkg.com/htmx.org@1.9.5" integrity="sha384-xcuj3WpfgjlKF+FXhSQFQ0ZNr39ln+hwjN3npfM9VBnUskLolQAcN80McRIVOPuO" crossorigin="anonymous"></script>
+    <style>
+      /* Normalize */
+      body {
+          font-family: Arial, sans-serif;
+          margin: 40px;
+          background-color: #f4f4f4;
+      }
+
+      /* Style the form */
+      form {
+          background-color: #fff;
+          padding: 20px;
+          border: 1px solid #e0e0e0;
+          box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      }
+
+      form input[type="text"] {
+          padding: 10px;
+          border: 1px solid #ccc;
+          width: 70%;
+          box-shadow: 0 0 5px rgba(0,0,0,0.1) inset;
+          margin-right: 10px; /* space between input and button */
+      }
+
+      form button {
+          padding: 10px 15px;
+          background-color: #007BFF;
+          border: none;
+          color: #fff;
+          cursor: pointer;
+          transition: background-color 0.3s;
+      }
+
+      form button:hover {
+          background-color: #0056b3;
+      }
+
+  </style>
+</head>
+<body>
+    <h1>Welcome to CrapGPT!</h1>
+    <form hx-post="/api/chat/" hx-trigger="submit" hx-target="#result" hx-swap="afterbegin">
+      <input type="text" name="summaryUrl" placeholder="What do you want to summarise?">
+      <button type="submit" hx-indicator="#spinner">Send</button>
+      
+    </form>
+    <div id="result"></div>
+</body>
+</html>
+

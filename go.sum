@@ -1,0 +1,9 @@
+github.com/cixtor/readability v1.0.0 h1:6YZo0JJsxt4Xor9lYpln3eSJeuQGukxIBois9wpQI6g=
+github.com/cixtor/readability v1.0.0/go.mod h1:WDrZcthrR2RVDxfMu3q0q59UKhReo5mIZAM6w1+MgFo=
+github.com/google/go-cmp v0.5.9 h1:O2Tfq5qg4qc4AmwVlvv0oLiVAGB7enBSJ2x2DqQFi38=
+github.com/mr-joshcrane/assistant v0.0.0-20230831094551-6a10b6163d6f h1:vxol8c6RooQ8jx6aTANhCjR6Z/UeEV5v9LqIDOpFeEQ=
+github.com/mr-joshcrane/assistant v0.0.0-20230831094551-6a10b6163d6f/go.mod h1:okYYXvGVfY7qcMb43rcB/R5jXgCrFMNeW330bww+i1k=
+github.com/mr-joshcrane/oracle v0.0.0-20230824142123-39ac847ffc6e h1:aNPJXYNMRX/GwyRAlzpxhpqEEXw2XZK2gujgkq+fk5o=
+github.com/mr-joshcrane/oracle v0.0.0-20230824142123-39ac847ffc6e/go.mod h1:Ka+R667MUaVDDp8FgJd1kp8yIPeoeARmaivAFz0rUQI=
+golang.org/x/net v0.14.0 h1:BONx9s002vGdD9umnlX1Po8vOZmrgH34qlHcD1MfK14=
+golang.org/x/net v0.14.0/go.mod h1:PpSgVXXLK0OxS0F31C1/tv6XNguvCrnXIDrFMspZIUI=
