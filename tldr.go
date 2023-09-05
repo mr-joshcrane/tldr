@@ -2,6 +2,7 @@ package tldr
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -11,6 +12,12 @@ import (
 	"github.com/cixtor/readability"
 	"github.com/mr-joshcrane/oracle"
 )
+
+//go:embed templates/card.html
+var cardsHTML string
+
+//go:embed templates/index.html
+var indexHTML string
 
 func TLDR(o *oracle.Oracle, url string) (string, error) {
 	o.SetPurpose("Please summarise the provided text as best you can. The shorter the better.")
@@ -44,16 +51,20 @@ func GetContent(path string) (msg string, err error) {
 type TLDRServer struct {
 	oracle     *oracle.Oracle
 	httpServer *http.Server
-	tmpl       *template.Template
+	templates  map[string]*template.Template
 }
 
 func NewTLDRServer(o *oracle.Oracle, addr string) *TLDRServer {
+	templates := map[string]*template.Template{
+		"card":  template.Must(template.New("card").Parse(cardsHTML)),
+		"index": template.Must(template.New("index").Parse(indexHTML)),
+	}
 	s := &TLDRServer{
 		oracle: o,
 		httpServer: &http.Server{
 			Addr: addr,
 		},
-		tmpl: template.Must(template.ParseFiles("templates/card.html")),
+		templates: templates,
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/chat/", s.chatHandler)
@@ -64,7 +75,7 @@ func NewTLDRServer(o *oracle.Oracle, addr string) *TLDRServer {
 }
 
 func (s *TLDRServer) indexHandler(w http.ResponseWriter, r *http.Request) {
-	err := template.Must(template.ParseFiles("templates/index.html")).Execute(w, nil)
+	err := s.templates["index"].Execute(w, nil)
 	if err != nil {
 		// Log something here?
 		fmt.Fprintln(os.Stderr, err)
@@ -111,7 +122,8 @@ func (s *TLDRServer) htmlFragment(w http.ResponseWriter, url string) error {
 		Title:   title,
 		Summary: summary,
 	}
-	return s.tmpl.Execute(w, data)
+	return s.templates["card"].Execute(w, data)
+
 }
 
 func (s *TLDRServer) ListenAndServe() error {
