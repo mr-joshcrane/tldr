@@ -1,55 +1,69 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Welcome to CrapGPT!</title>
+    <title>Welcome to TLDR!</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://unpkg.com/htmx.org@1.9.5" integrity="sha384-xcuj3WpfgjlKF+FXhSQFQ0ZNr39ln+hwjN3npfM9VBnUskLolQAcN80McRIVOPuO" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <meta name="htmx-config" content='{"includeIndicatorStyles": false}'>
+    
     <style>
-      /* Normalize */
-      body {
-          font-family: Arial, sans-serif;
-          margin: 40px;
-          background-color: #f4f4f4;
-      }
 
-      /* Style the form */
-      form {
-          background-color: #fff;
-          padding: 20px;
-          border: 1px solid #e0e0e0;
-          box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      }
+.body {
+  padding: 1em;
+}
 
-      form input[type="text"] {
-          padding: 10px;
-          border: 1px solid #ccc;
-          width: 70%;
-          box-shadow: 0 0 5px rgba(0,0,0,0.1) inset;
-          margin-right: 10px; /* space between input and button */
-      }
+.error-card {
+  color: #721c24;
+  background-color: #1B1B1B;
+  border-color: #808080;
+  border: 1px solid transparent;
+  margin-bottom: 1em;
+}
 
-      form button {
-          padding: 10px 15px;
-          background-color: #007BFF;
-          border: none;
-          color: #fff;
-          cursor: pointer;
-          transition: background-color 0.3s;
-      }
+.result-card {
+  color: #155724;
+  background-color: #1B1B1B;
+  border-color: #808080;
+  border: 1px solid;
+  margin-bottom: 1em;
+}
 
-      form button:hover {
-          background-color: #0056b3;
-      }
+.htmx-indicator{
+    display: inline;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s, opacity 0.5s linear;
+}
+.htmx-request .htmx-indicator {
+    visibility: visible;
+    opacity: 1;
+}
+.htmx-request.htmx-indicator {
+    visibility: visible;
+    opacity: 1;
+}
 
-  </style>
+    </style>
 </head>
-<body>
-    <h1>Welcome to CrapGPT!</h1>
-    <form hx-post="/api/chat/" hx-trigger="submit" hx-target="#result" hx-swap="afterbegin">
-      <input type="text" name="summaryUrl" placeholder="What do you want to summarise?">
-      <button type="submit" hx-indicator="#spinner">Send</button>
-      
-    </form>
-    <div id="result"></div>
+<body class="pico-bg-gray-100 pico-p-6">
+    <div>
+        <div class="pico-card pico-m-8">
+            <h2 class="pico-px-4">Enter a URL and we'll summarise its content for you!</h2>
+            <div class="pico-px-4 pico-py-4">
+                <form hx-indicator="#loadingIndicator" hx-post="/api/chat/" hx-trigger="submit" hx-target="#result" hx-swap="afterbegin">
+                    <div>
+                        <label>What do you want to summarise?</label>
+                        <input type="text" name="summaryUrl" class="form-input" placeholder="Enter URL here">
+                        <button type="submit">
+                          <span>Send</span>
+                          <img id="loadingIndicator" class="htmx-indicator" src="static/loading.svg" width="20px;">
+                        </button>
+                    </div>
+                </form>
+            </div> 
+        </div>
+        <div id="result"></div>
+    </div>
 </body>
 </html>
-
