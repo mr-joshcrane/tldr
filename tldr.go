@@ -13,14 +13,8 @@ import (
 	"github.com/mr-joshcrane/oracle"
 )
 
-//go:embed templates/card.html
-var cardsHTML string
-
-//go:embed templates/error.html
-var errorHTML string
-
-//go:embed templates/index.html
-var indexHTML string
+//go:embed templates/*.html
+var templates embed.FS
 
 //go:embed static/*
 var staticFiles embed.FS
@@ -61,18 +55,21 @@ type TLDRServer struct {
 }
 
 func NewTLDRServer(o *oracle.Oracle, addr string) *TLDRServer {
-	templates := map[string]*template.Template{
-		"card":  template.Must(template.New("card").Parse(cardsHTML)),
-		"index": template.Must(template.New("index").Parse(indexHTML)),
-		"error": template.Must(template.New("error").Parse(errorHTML)),
-	}
 	s := &TLDRServer{
 		oracle: o,
 		httpServer: &http.Server{
 			Addr: addr,
 		},
-		templates: templates,
+		templates: make(map[string]*template.Template),
 	}
+	t, err := template.ParseFS(templates, "templates/*.html")
+	if err != nil {
+		panic(err)
+	}
+	s.templates["index"] = t.Lookup("index.html")
+	s.templates["card"] = t.Lookup("card.html")
+	s.templates["error"] = t.Lookup("error.html")
+
 	mux := http.NewServeMux()
 	assets := http.FS(staticFiles)
 	mux.Handle("/static/", http.FileServer(assets))
