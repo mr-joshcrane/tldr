@@ -11,7 +11,7 @@ import (
 func main() {
 	key := os.Getenv("OPENAI_API_KEY")
 	o := oracle.NewOracle(key)
-	srv := tldr.NewTLDRServer(o, ":8082")
+	srv := tldr.NewTLDRServer(o, ":8080")
 	err := srv.ListenAndServe()
 	if err != nil {
 		log.Fatal(err)

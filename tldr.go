@@ -2,7 +2,7 @@ package tldr
 
 import (
 	"context"
-	_ "embed"
+	"embed"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -16,8 +16,14 @@ import (
 //go:embed templates/card.html
 var cardsHTML string
 
+//go:embed templates/error.html
+var errorHTML string
+
 //go:embed templates/index.html
 var indexHTML string
+
+//go:embed static/*
+var staticFiles embed.FS
 
 func TLDR(o *oracle.Oracle, url string) (string, error) {
 	o.SetPurpose("Please summarise the provided text as best you can. The shorter the better.")
@@ -58,6 +64,7 @@ func NewTLDRServer(o *oracle.Oracle, addr string) *TLDRServer {
 	templates := map[string]*template.Template{
 		"card":  template.Must(template.New("card").Parse(cardsHTML)),
 		"index": template.Must(template.New("index").Parse(indexHTML)),
+		"error": template.Must(template.New("error").Parse(errorHTML)),
 	}
 	s := &TLDRServer{
 		oracle: o,
@@ -67,6 +74,8 @@ func NewTLDRServer(o *oracle.Oracle, addr string) *TLDRServer {
 		templates: templates,
 	}
 	mux := http.NewServeMux()
+	assets := http.FS(staticFiles)
+	mux.Handle("/static/", http.FileServer(assets))
 	mux.HandleFunc("/api/chat/", s.chatHandler)
 	mux.HandleFunc("/", s.indexHandler)
 
@@ -96,21 +105,18 @@ func (s *TLDRServer) chatHandler(w http.ResponseWriter, r *http.Request) {
 	url := r.FormValue("summaryUrl")
 	err = s.htmlFragment(w, url)
 	if err != nil {
-		// Log something here?
 		fmt.Fprintln(os.Stderr, err)
-		http.Error(w, "Internal error", http.StatusInternalServerError)
+		s.templates["error"].Execute(w, err)
 	}
 }
 
 func (s *TLDRServer) htmlFragment(w http.ResponseWriter, url string) error {
 	summary, err := TLDR(s.oracle, url)
 	if err != nil {
-		// Log something here?
 		return err
 	}
 	title, err := s.oracle.Ask(fmt.Sprintf("Given the summary, generate a title for this article: %s?", summary))
 	if err != nil {
-		// Log something here?
 		return err
 	}
 	data := struct {
@@ -123,7 +129,6 @@ func (s *TLDRServer) htmlFragment(w http.ResponseWriter, url string) error {
 		Summary: summary,
 	}
 	return s.templates["card"].Execute(w, data)
-
 }
 
 func (s *TLDRServer) ListenAndServe() error {

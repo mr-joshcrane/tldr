@@ -6,45 +6,7 @@
     <script src="https://unpkg.com/htmx.org@1.9.5" integrity="sha384-xcuj3WpfgjlKF+FXhSQFQ0ZNr39ln+hwjN3npfM9VBnUskLolQAcN80McRIVOPuO" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
     <meta name="htmx-config" content='{"includeIndicatorStyles": false}'>
-    
-    <style>
-
-.body {
-  padding: 1em;
-}
-
-.error-card {
-  color: #721c24;
-  background-color: #1B1B1B;
-  border-color: #808080;
-  border: 1px solid transparent;
-  margin-bottom: 1em;
-}
-
-.result-card {
-  color: #155724;
-  background-color: #1B1B1B;
-  border-color: #808080;
-  border: 1px solid;
-  margin-bottom: 1em;
-}
-
-.htmx-indicator{
-    display: inline;
-    visibility: hidden;
-    opacity: 0;
-    transition: visibility 0s, opacity 0.5s linear;
-}
-.htmx-request .htmx-indicator {
-    visibility: visible;
-    opacity: 1;
-}
-.htmx-request.htmx-indicator {
-    visibility: visible;
-    opacity: 1;
-}
-
-    </style>
+    <link rel="stylesheet" href="static/style.css">
 </head>
 <body class="pico-bg-gray-100 pico-p-6">
     <div>
