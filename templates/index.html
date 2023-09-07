@@ -1,31 +1,56 @@
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <title>Welcome to TLDR!</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="https://unpkg.com/htmx.org@1.9.5" integrity="sha384-xcuj3WpfgjlKF+FXhSQFQ0ZNr39ln+hwjN3npfM9VBnUskLolQAcN80McRIVOPuO" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
-    <meta name="htmx-config" content='{"includeIndicatorStyles": false}'>
-    <link rel="stylesheet" href="static/style.css">
-</head>
-<body class="pico-bg-gray-100 pico-p-6">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script
+      src="https://unpkg.com/htmx.org@1.9.5"
+      integrity="sha384-xcuj3WpfgjlKF+FXhSQFQ0ZNr39ln+hwjN3npfM9VBnUskLolQAcN80McRIVOPuO"
+      crossorigin="anonymous"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css"
+    />
+    <meta name="htmx-config" content='{"includeIndicatorStyles": false}' />
+    <link rel="stylesheet" href="static/style.css" />
+  </head>
+  <body class="pico-bg-gray-100 pico-p-6">
     <div>
-        <div class="pico-card pico-m-8">
-            <h2 class="pico-px-4">Enter a URL and we'll summarise its content for you!</h2>
-            <div class="pico-px-4 pico-py-4">
-                <form hx-indicator="#loadingIndicator" hx-post="/api/chat/" hx-trigger="submit" hx-target="#result" hx-swap="afterbegin">
-                    <div>
-                        <label>What do you want to summarise?</label>
-                        <input type="text" name="summaryUrl" class="form-input" placeholder="Enter URL here">
-                        <button type="submit">
-                          <span>Send</span>
-                          <img id="loadingIndicator" class="htmx-indicator" src="static/loading.svg" width="20px;">
-                        </button>
-                    </div>
-                </form>
-            </div> 
+      <div class="pico-card pico-m-8">
+        <h2 class="pico-px-4">
+          Enter a URL and we'll summarise its content for you!
+        </h2>
+        <div class="pico-px-4 pico-py-4">
+          <form
+            hx-indicator="#loadingIndicator"
+            hx-post="/api/chat/"
+            hx-trigger="submit"
+            hx-target="#result"
+            hx-swap="afterbegin"
+          >
+            <div>
+              <label>What do you want to summarise?</label>
+              <input
+                type="text"
+                name="summaryUrl"
+                class="form-input"
+                placeholder="Enter URL here"
+              />
+              <button type="submit">
+                <span>Send</span>
+                <img
+                  id="loadingIndicator"
+                  class="htmx-indicator"
+                  src="static/loading.svg"
+                  width="20px;"
+                />
+              </button>
+            </div>
+          </form>
         </div>
-        <div id="result"></div>
+      </div>
+      <div id="result"></div>
     </div>
-</body>
+  </body>
 </html>

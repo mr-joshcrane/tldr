@@ -4,7 +4,7 @@
 
 .error-card {
   color: #721c24;
-  background-color: #1B1B1B;
+  background-color: #1b1b1b;
   border-color: #808080;
   border: 1px solid;
   margin-bottom: 1em;
@@ -12,23 +12,23 @@
 
 .result-card {
   color: #155724;
-  background-color: #1B1B1B;
+  background-color: #1b1b1b;
   border-color: #808080;
   border: 1px solid;
   margin-bottom: 1em;
 }
 
-.htmx-indicator{
-    display: inline;
-    visibility: hidden;
-    opacity: 0;
-    transition: visibility 0s, opacity 0.5s linear;
+.htmx-indicator {
+  display: inline;
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s, opacity 0.5s linear;
 }
 .htmx-request .htmx-indicator {
-    visibility: visible;
-    opacity: 1;
+  visibility: visible;
+  opacity: 1;
 }
 .htmx-request.htmx-indicator {
-    visibility: visible;
-    opacity: 1;
+  visibility: visible;
+  opacity: 1;
 }
