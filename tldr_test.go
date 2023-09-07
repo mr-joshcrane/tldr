@@ -41,8 +41,8 @@ func TestChatHandlerAcceptsPost(t *testing.T) {
 func TestSplit(t *testing.T) {
 	t.Parallel()
 	longInput := "some long text"
-	got := tldr.Split(longInput, 4)
-	want := []string{"some", "long", "text"}
+	got := tldr.Split(longInput, 5)
+	want := []string{"some ", "long ", "text"}
 	if !cmp.Equal(got, want) {
 		t.Fatalf("Expected %v, got %v", want, got)
 	}

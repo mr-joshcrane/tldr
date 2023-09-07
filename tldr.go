@@ -83,7 +83,6 @@ func NewTLDRServer(o *oracle.Oracle, addr string) *TLDRServer {
 func (s *TLDRServer) indexHandler(w http.ResponseWriter, r *http.Request) {
 	err := s.templates["index"].Execute(w, nil)
 	if err != nil {
-		// Log something here?
 		fmt.Fprintln(os.Stderr, err)
 		http.Error(w, "Internal error", http.StatusInternalServerError)
 	}
@@ -134,4 +133,14 @@ func (s *TLDRServer) ListenAndServe() error {
 
 func (s *TLDRServer) Shutdown() error {
 	return s.httpServer.Shutdown(context.TODO())
+}
+
+func Split(s string, n int) []string {
+	var chunks []string
+	for len(s) > n {
+		chunks = append(chunks, s[:n])
+		s = s[n:]
+	}
+	chunks = append(chunks, s)
+	return chunks
 }
