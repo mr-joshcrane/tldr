@@ -9,8 +9,9 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/mr-joshcrane/assistant"
+	"github.com/google/go-cmp/cmp"
 	"github.com/mr-joshcrane/oracle"
+	"github.com/mr-joshcrane/tldr"
 )
 
 func TestChatHandlerAcceptsPost(t *testing.T) {
@@ -37,6 +38,17 @@ func TestChatHandlerAcceptsPost(t *testing.T) {
 	}
 }
 
+func TestSplit(t *testing.T) {
+	t.Parallel()
+	longInput := "some long text"
+	got := tldr.Split(longInput, 4)
+	want := []string{"some", "long", "text"}
+	if !cmp.Equal(got, want) {
+		t.Fatalf("Expected %v, got %v", want, got)
+	}
+
+}
+
 func newTestTLDRServer(t *testing.T) string {
 	t.Helper()
 	l, err := net.Listen("tcp", "127.0.0.1:0")
@@ -47,7 +59,7 @@ func newTestTLDRServer(t *testing.T) string {
 	addr := l.Addr().String()
 	l.Close()
 	o := oracle.NewOracle("dummy-key", oracle.WithDummyClient("A summary of the article"))
-	srv := assistant.NewTLDRServer(o, addr)
+	srv := tldr.NewTLDRServer(o, addr)
 	go func() {
 		err := srv.ListenAndServe()
 		if err != http.ErrServerClosed && err != nil {
