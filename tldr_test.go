@@ -2,12 +2,12 @@ package tldr_test
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"net"
 	"net/http"
 	"net/url"
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/mr-joshcrane/oracle"
@@ -17,7 +17,6 @@ import (
 func TestChatHandlerAcceptsPost(t *testing.T) {
 	t.Parallel()
 	addr := newTestTLDRServer(t)
-	fmt.Println(addr)
 	v := url.Values{
 		"summaryUrl": []string{"https://example.com"},
 	}
@@ -46,7 +45,22 @@ func TestSplit(t *testing.T) {
 	if !cmp.Equal(got, want) {
 		t.Fatalf("Expected %v, got %v", want, got)
 	}
+}
 
+func TestRecursiveSummary(t *testing.T) {
+	t.Parallel()
+	o := oracle.NewOracle("dummy-key", oracle.WithDummyClient("A summary of the article"))
+	content, err := tldr.GetContent("https://go.dev/ref/spec")
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+	tldr, err := tldr.RecursiveSummary(o, content, 4096*3)
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+	if tldr != "A summary of the article" {
+		t.Fatalf("Expected %s, got %s", "A summary of the article", tldr)
+	}
 }
 
 func newTestTLDRServer(t *testing.T) string {
@@ -67,5 +81,24 @@ func newTestTLDRServer(t *testing.T) string {
 		}
 	}()
 	t.Cleanup(func() { _ = srv.Shutdown() })
+	err = waitForServer(addr)
+	if err != nil {
+		t.Fatalf("Test server failed to start in time")
+	}
 	return addr
+}
+
+func waitForServer(url string) error {
+	const timeout = 3 * time.Second
+	start := time.Now()
+	for {
+		_, err := http.Get("http://" + url)
+		if err == nil {
+			return nil
+		}
+		if time.Since(start) >= timeout {
+			return err
+		}
+		time.Sleep(time.Millisecond * 20)
+	}
 }
