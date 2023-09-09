@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
+	"sync"
 
 	"github.com/cixtor/readability"
 	"github.com/mr-joshcrane/oracle"
@@ -20,12 +22,39 @@ var templates embed.FS
 var staticFiles embed.FS
 
 func TLDR(o *oracle.Oracle, url string) (string, error) {
-	o.SetPurpose("Please summarise the provided text as best you can. The shorter the better.")
+	o.SetPurpose("Please summarise the provided text as best you can. The shorter the better. If there is a general thesis statement, please provide it.")
 	content, err := GetContent(url)
 	if err != nil {
 		return "", err
 	}
+	if len(content) >= 4096*3 {
+		content, err = RecursiveSummary(o, content, 4096*3)
+		if err != nil {
+			return "", err
+		}
+	}
 	return o.Ask(content)
+}
+
+func RecursiveSummary(o *oracle.Oracle, content string, maxLen int) (string, error) {
+	var wg sync.WaitGroup
+	contentSplit := Split(content, maxLen)
+	if len(content) <= maxLen {
+		return content, nil
+	}
+	chunkSummaries := make([]string, len(contentSplit))
+	for i, s := range contentSplit {
+		wg.Add(1)
+		go func(i int, s string) {
+			defer wg.Done()
+			chunkSummary, _ := o.Ask(s)
+
+			chunkSummaries[i] = chunkSummary
+
+		}(i, s)
+	}
+	wg.Wait()
+	return o.Ask(strings.Join(chunkSummaries, " "))
 }
 
 // GetContent takes a url, checks if it is a file or URL, and returns the
