@@ -33,7 +33,7 @@ func TLDR(o *oracle.Oracle, url string) (string, error) {
 			return "", err
 		}
 	}
-	return o.Ask(content)
+	return o.Ask(context.Background(), content)
 }
 
 func RecursiveSummary(o *oracle.Oracle, content string, maxLen int) (string, error) {
@@ -47,14 +47,14 @@ func RecursiveSummary(o *oracle.Oracle, content string, maxLen int) (string, err
 		wg.Add(1)
 		go func(i int, s string) {
 			defer wg.Done()
-			chunkSummary, _ := o.Ask(s)
+			chunkSummary, _ := o.Ask(context.Background(), s)
 
 			chunkSummaries[i] = chunkSummary
 
 		}(i, s)
 	}
 	wg.Wait()
-	return o.Ask(strings.Join(chunkSummaries, " "))
+	return o.Ask(context.Background(), strings.Join(chunkSummaries, " "))
 }
 
 // GetContent takes a url, checks if it is a file or URL, and returns the
@@ -140,7 +140,7 @@ func (s *TLDRServer) htmlFragment(w http.ResponseWriter, url string) error {
 	if err != nil {
 		return err
 	}
-	title, err := s.oracle.Ask(fmt.Sprintf("Given the summary, generate a title for this article: %s?", summary))
+	title, err := s.oracle.Ask(context.Background(), fmt.Sprintf("Given the summary, generate a title for this article: %s?", summary))
 	if err != nil {
 		return err
 	}
